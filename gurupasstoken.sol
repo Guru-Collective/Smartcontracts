@@ -27,26 +27,29 @@ contract GuruPassToken is ERC721, Ownable
 {
     uint256 public tokensCounter;
 
-    constructor() ERC721("Guru Collective", "GURU")
+    constructor() ERC721("Guru Collective", "GURUPASS")
     {
     }
 
-    function safeMint(address recepient) public onlyOwner
+    function safeMint(address recepient) public onlyOwner returns(uint256)
     {
-        _mintSingle(recepient);
+        return _mintSingle(recepient);
     }
 
-    function safeMintMulti(address recepient, uint256 amount) public onlyOwner
+    function safeMintMulti(address recepient, uint256 amount) public onlyOwner returns(uint256)
     {
+        uint256 last;
         for(uint256 i = 0; i < amount; i++)
         {
-            _mintSingle(recepient);
+            last = _mintSingle(recepient);
         }
+        return last;
     }
 
-    function _mintSingle(address recipient) internal
+    function _mintSingle(address recipient) internal returns(uint256)
     {
         tokensCounter++;
         _safeMint(recipient, tokensCounter);
+        return tokensCounter;
     }
 }
