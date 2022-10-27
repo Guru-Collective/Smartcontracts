@@ -1,18 +1,18 @@
 /*
 This file is part of the Guru Collective DAO.
 
-The GuruPass Contract is free software: you can redistribute it and/or
+The GuruPassToken Contract is free software: you can redistribute it and/or
 modify it under the terms of the GNU lesser General Public License as published
 by the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-The GuruPass Contract is distributed in the hope that it will be useful,
+The GuruPassToken Contract is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU lesser General Public License for more details.
 
 You should have received a copy of the GNU lesser General Public License
-along with the GuruPass Contract. If not, see <http://www.gnu.org/licenses/>.
+along with the GuruPassToken Contract. If not, see <http://www.gnu.org/licenses/>.
 
 @author Ilya Svirin <is.svirin@gmail.com>
 */
@@ -25,10 +25,22 @@ import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/access/Ownable.
 
 contract GuruPassToken is ERC721, Ownable
 {
-    uint256 public tokensCounter;
+    uint256 public  tokensCounter;
+    string  private base;
 
     constructor() ERC721("Guru Collective", "GURUPASS")
     {
+        setBaseURI("https://gurucollective.xyz/metadata/");
+    }
+
+    function setBaseURI(string memory baseURI) public onlyOwner
+    {
+        base = baseURI;
+    }
+
+    function _baseURI() internal view override returns (string memory)
+    {
+        return base;
     }
 
     function safeMint(address recepient) public onlyOwner returns(uint256)
