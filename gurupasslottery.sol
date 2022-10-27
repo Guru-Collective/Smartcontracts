@@ -26,6 +26,7 @@ contract GuruPassLottery is Ownable, IERC721Receiver
 {
     event Deployed(address prizeContract, address token, uint256 initialTokenId);
     event PrizeDeposited(uint256 indexed tokenId);
+    event Win(address indexed winner, uint256 indexed tokenId);
 
     IERC721       public prizeContract;
     uint256 []    public prizes;
@@ -73,6 +74,7 @@ contract GuruPassLottery is Ownable, IERC721Receiver
 
             address winner = token.ownerOf(initialTokenId + value);
             token.safeTransferFrom(address(this), winner, prizes[i]);
+            emit Win(winner, prizes[i]);
             totalSize = totalSize - 1;
         }
 
