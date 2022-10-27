@@ -48,10 +48,34 @@ contract GuruPassLottery is Ownable, IERC721Receiver
         return this.onERC721Received.selector;
     }
 
+    mapping (uint256 => uint256) internal indices;
     function reveal() public onlyOwner
     {
-        require(prizes.length <= token.tokensCounter() - initialTokenId + 1, "GuruPassLottery: not enough participants");
+        uint256 totalSize = token.tokensCounter() - initialTokenId + 1;
+        require(prizes.length <= totalSize, "GuruPassLottery: not enough participants");
+        
+        for(uint256 i = 0; i < prizes.length; i++)
+        {
+            uint256 index = uint256(keccak256(abi.encodePacked(i, block.difficulty, block.timestamp))) % totalSize;
+            uint256 value = indices[index] != 0 ? indices[index] : index;
 
-        // TODO: implement reveal()
+            // Move last value to selected position
+            if (indices[totalSize - 1] == 0)
+            {
+                // Array position not initialized, so use position
+                indices[index] = totalSize - 1;
+            }
+            else
+            {
+                // Array position holds a value so use that
+                indices[index] = indices[totalSize - 1];
+            }
+
+            address winner = token.ownerOf(initialTokenId + value);
+            token.safeTransferFrom(address(this), winner, prizes[i]);
+            totalSize = totalSize - 1;
+        }
+
+        selfdestruct(payable(_msgSender()));
     }
 }
