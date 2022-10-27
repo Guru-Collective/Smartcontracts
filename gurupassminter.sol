@@ -20,12 +20,24 @@ along with the GuruPassMinter Contract. If not, see <http://www.gnu.org/licenses
 
 pragma solidity ^0.8.0;
 
+import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/Address.sol";
 import "./gurupasstoken.sol";
 import "./gurupasswhitelist.sol";
 
-contract GuruPassMinter is Ownable, IERC721Receiver
+contract GuruPassMinter is Ownable
 {
+    using Address for address payable;
+
     event Deployed(address tokenContract, address treasuryAddress);
+    event StageLaunched(
+        uint256 tokenPrice,
+        uint256 stageSupply,
+        bool    mustBeHolder,
+        address beneficiaries,
+        uint256 beneficiariesPercents,
+        uint256 stageFinishTime,
+        address whitelist);
+    event Minted(address indexed owner, uint256 amount);
 
     GuruPassToken     public token;
     address payable   public treasury;
@@ -51,12 +63,6 @@ contract GuruPassMinter is Ownable, IERC721Receiver
         selfdestruct(treasury);
     }
 
-    function onERC721Received(address /*operator*/, address /*from*/, uint256 /*tokenId*/, bytes calldata /*data*/) public view override returns (bytes4)
-    {
-        require(_msgSender() == address(token), "GuruPassMinter: only owner can attach new NFT to contract");
-        return this.onERC721Received.selector;
-    }
-
     function stageLaunch(
         uint256         _tokenPrice,
         uint256         _stageSupply,
@@ -66,25 +72,74 @@ contract GuruPassMinter is Ownable, IERC721Receiver
         uint256         _stageDurationDays,
         address         _whitelist) public onlyOwner
     {
+        require(_tokenPrice > 0, "GuruPassMinter: invalid price");
+        require(_beneficiariesPercents <= 100, "GuruPassMinter: invalid beneficiariesPercents");
+        require(_beneficiariesPercents == 0 || _beneficiaries != address(0), "GuruPassMinter: invalid beneficiaries address");
         tokenPrice = _tokenPrice;
         stageSupply = _stageSupply;
         mustBeHolder = _mustBeHolder;
         beneficiaries = _beneficiaries;
         beneficiariesPercents = _beneficiariesPercents;
         stageFinishTime = block.timestamp + _stageDurationDays * 1 days;
-        whitelist = GuruPassWhitelist(_whitelist);
-
-        // TODO: emit event
+        if (_whitelist == address(0))
+        {
+            delete whitelist;
+        }
+        else
+        {
+            whitelist = GuruPassWhitelist(_whitelist);
+        }
+        emit StageLaunched(
+            tokenPrice,
+            stageSupply,
+            mustBeHolder,
+            beneficiaries,
+            beneficiariesPercents,
+            stageFinishTime,
+            _whitelist);
     }
 
     receive () payable external
     {
-        // TODO: chack for stage is active (time and rest of supply)
-        // TODO: check conditions (whitelist and/or tokenHolder)
-        // TODO: calculate amount of tokens (taking into account the rest of supply)
-        // TODO: mint tokens
-        // TODO: send funds to treasury and beneficiaries
-        // TODO: send back change
-        // TODO: emit event
+        require(block.timestamp < stageFinishTime, "GuruPassMinter: no active stage");
+        require(stageSupply > 0, "GuruPassMinter: stage supply is over");
+        require(address(whitelist) == address(0) || whitelist.isBlessed(_msgSender()), "GuruPassMinter: not whitelisted");
+        require(!mustBeHolder || token.balanceOf(_msgSender()) > 0, "GuruPassMinter: not a tokenholder");
+        
+        uint256 amount = msg.value / tokenPrice;
+        if (amount > stageSupply)
+        {
+            amount = stageSupply;
+        }
+        require(amount > 0, "GuruPassMinter: not enough funds");
+        
+        if (amount == 1)
+        {
+            token.safeMint(_msgSender());
+        }
+        else
+        {
+            token.safeMintMulti(_msgSender(), amount);
+        }
+        stageSupply -= amount;
+
+        uint256 amountWei = amount * tokenPrice;
+        if (beneficiariesPercents == 0)
+        {
+            treasury.sendValue(amountWei);
+        }
+        else
+        {
+            uint256 beneficiariesWei = amountWei * beneficiariesPercents / 100;
+            beneficiaries.sendValue(beneficiariesWei);
+            treasury.sendValue(amountWei - beneficiariesWei);
+        }
+
+        if (amountWei < msg.value)
+        {
+            payable(_msgSender()).sendValue(msg.value - amountWei);
+        }
+
+        emit Minted(_msgSender(), amount);
     }
 }
