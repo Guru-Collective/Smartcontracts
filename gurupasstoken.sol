@@ -26,17 +26,26 @@ import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/access/Ownable.
 contract GuruPassToken is ERC721, Ownable
 {
     event CustomMetaSet(uint256 indexed tokenId, string meta);
+    event MetaLoaderChanged(address indexed addr);
 
     uint256 public tokensCounter;
+    address public metaLoader;
     string  public base;
     string  public defaultMeta;
     mapping (uint256 => string) customMetas;
 
     constructor() ERC721("Guru Collective", "GURUPASS")
     {
+        setMetaLoader(_msgSender());
         setBaseURI("https://ipfs.io/ipfs/");
         // TODO: add CID of default json
         setDefaultMeta("...");
+    }
+
+    function setMetaLoader(address addr) public onlyOwner
+    {
+        metaLoader = addr;
+        emit MetaLoaderChanged(addr);
     }
 
     function setBaseURI(string memory baseURI) public onlyOwner
@@ -49,8 +58,9 @@ contract GuruPassToken is ERC721, Ownable
         defaultMeta = meta;
     }
 
-    function setCustomMeta(uint256 tokenId, string memory meta) public onlyOwner
+    function setCustomMeta(uint256 tokenId, string memory meta) public
     {
+        require(_msgSender() == owner() || _msgSender() == metaLoader, "GuruPassToken: permission denied");
         customMetas[tokenId] = meta;
         emit CustomMetaSet(tokenId, meta);
     }
