@@ -25,12 +25,18 @@ import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/access/Ownable.
 
 contract GuruPassToken is ERC721, Ownable
 {
-    uint256 public  tokensCounter;
-    string  private base;
+    event CustomMetaSet(uint256 indexed tokenId, string meta);
+
+    uint256 public tokensCounter;
+    string  public base;
+    string  public defaultMeta;
+    mapping (uint256 => string) customMetas;
 
     constructor() ERC721("Guru Collective", "GURUPASS")
     {
-        setBaseURI("https://gurucollective.xyz/metadata/");
+        setBaseURI("https://ipfs.io/ipfs/");
+        // TODO: add CID of default json
+        setDefaultMeta("...");
     }
 
     function setBaseURI(string memory baseURI) public onlyOwner
@@ -38,9 +44,26 @@ contract GuruPassToken is ERC721, Ownable
         base = baseURI;
     }
 
-    function _baseURI() internal view override returns (string memory)
+    function setDefaultMeta(string memory meta) public onlyOwner
     {
-        return base;
+        defaultMeta = meta;
+    }
+
+    function setCustomMeta(uint256 tokenId, string memory meta) public onlyOwner
+    {
+        customMetas[tokenId] = meta;
+        emit CustomMetaSet(tokenId, meta);
+    }
+
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory)
+    {
+        require(_exists(tokenId), "GuruPassToken: URI query for nonexistent token");
+        string memory meta = customMetas[tokenId];
+        if(bytes(meta).length == 0)
+        {
+            meta = defaultMeta;
+        }
+        return string(abi.encodePacked(base, meta));
     }
 
     function safeMint(address recepient) public onlyOwner returns(uint256)
