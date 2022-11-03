@@ -25,6 +25,7 @@ import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/access/Ownable.
 
 contract GuruPassToken is ERC721, Ownable
 {
+    event Deployed();
     event CustomMetaSet(uint256 indexed tokenId, string meta);
     event MetaLoaderChanged(address indexed addr);
 
@@ -39,6 +40,7 @@ contract GuruPassToken is ERC721, Ownable
         setMetaLoader(_msgSender());
         setBaseURI("https://ipfs.io/ipfs/");
         setDefaultMeta("bafkreiccsnyjhpjnhz33sl4rd3gqxjjp3nuq2fuslxbglyuccznagj2iee");
+        emit Deployed();
     }
 
     function setMetaLoader(address addr) public onlyOwner
