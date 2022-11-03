@@ -34,12 +34,11 @@ contract GuruPassToken is ERC721, Ownable
     string  public defaultMeta;
     mapping (uint256 => string) customMetas;
 
-    constructor() ERC721("Guru Collective", "GURUPASS")
+    constructor() ERC721("Guru Collective", "Guru Pass")
     {
         setMetaLoader(_msgSender());
         setBaseURI("https://ipfs.io/ipfs/");
-        // TODO: add CID of default json
-        setDefaultMeta("...");
+        setDefaultMeta("bafkreiccsnyjhpjnhz33sl4rd3gqxjjp3nuq2fuslxbglyuccznagj2iee");
     }
 
     function setMetaLoader(address addr) public onlyOwner
