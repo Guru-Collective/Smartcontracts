@@ -32,10 +32,10 @@ contract GuruPassDitribution is ERC20, ReentrancyGuard
 
     using Address for address payable;
 
-    constructor (string memory name, string memory symbol) ERC20(name, symbol)
+    constructor (address owner, string memory name, string memory symbol) ERC20(name, symbol)
     {
         emit Deployed(name, symbol);
-        _mint(_msgSender(), 1000000000);
+        _mint(owner, 1000000000);
     }
 
     function decimals() public view virtual override returns (uint8)
@@ -56,5 +56,13 @@ contract GuruPassDitribution is ERC20, ReentrancyGuard
         _burn(_msgSender(), lp);
         payable(_msgSender()).sendValue(reward);        
         emit Withdrawn(_msgSender(), lp, reward);
+    }
+}
+
+contract GuruPassDitributionFactory is Context
+{
+    function createDistribution(string memory name, string memory symbol) public returns(address)
+    {
+        return address(new GuruPassDitribution(_msgSender(), name, symbol));
     }
 }

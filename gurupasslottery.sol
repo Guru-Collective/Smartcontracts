@@ -81,3 +81,13 @@ contract GuruPassLottery is Ownable, IERC721Receiver
         selfdestruct(payable(_msgSender()));
     }
 }
+
+contract GuruPassLotteryFactory is Context
+{
+    function createLottery(address _prizeContract, address _token, uint256 _initialTokenId) public returns(address)
+    {
+        GuruPassLottery lot = new GuruPassLottery(_prizeContract, _token, _initialTokenId);
+        lot.transferOwnership(_msgSender());
+        return address(lot);
+    }
+}

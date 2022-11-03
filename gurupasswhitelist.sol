@@ -59,3 +59,13 @@ contract GuruPassWhitelist is Ownable
         emit Blessed(user);
     }
 }
+
+contract GuruPassWhitelistFactory is Context
+{
+    function createWhitelist() public returns(address)
+    {
+        GuruPassWhitelist w = new GuruPassWhitelist();
+        w.transferOwnership(_msgSender());
+        return address(w);
+    }
+}
