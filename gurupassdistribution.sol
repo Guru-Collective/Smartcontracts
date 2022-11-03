@@ -59,7 +59,7 @@ contract GuruPassDitribution is ERC20, ReentrancyGuard
     }
 }
 
-contract GuruPassDitributionFactory is Context
+contract GuruPassDistributionFactory is Context
 {
     function createDistribution(string memory name, string memory symbol) public returns(address)
     {
