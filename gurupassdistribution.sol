@@ -24,7 +24,7 @@ import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC20/ERC
 import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/Address.sol";
 
-contract GuruPassDitribution is ERC20, ReentrancyGuard
+contract GuruPassDistribution is ERC20, ReentrancyGuard
 {
     event Deployed(string name, string symbol);
     event Received(uint256 amountOfWei);
@@ -63,6 +63,6 @@ contract GuruPassDistributionFactory is Context
 {
     function createDistribution(string memory name, string memory symbol) public returns(address)
     {
-        return address(new GuruPassDitribution(_msgSender(), name, symbol));
+        return address(new GuruPassDistribution(_msgSender(), name, symbol));
     }
 }
