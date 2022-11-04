@@ -42,7 +42,8 @@ contract GuruPassDeployer is Context
         address minter = address(new GuruPassMinter(token, treasury));
 
         //GuruPassToken(token).transferOwnership(minter);
-        GuruPassToken(token).transferOwnership(_msgSender());
+        Ownable(token).transferOwnership(_msgSender());
+        Ownable(minter).transferOwnership(_msgSender());
 
         emit Deployed(
             token,
