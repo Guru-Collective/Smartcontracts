@@ -38,10 +38,11 @@ contract GuruPassDeployer is Context
         address token = address(new GuruPassToken());
         address whitelistfactory = address(new GuruPassWhitelistFactory());
         address distributionfactory = address(new GuruPassDistributionFactory());
-        address lotteryfactory = address(new GuruPassLotteryFactory());
+        address lotteryfactory = address(new GuruPassLotteryFactory(token));
         address minter = address(new GuruPassMinter(token, treasury));
 
         //GuruPassToken(token).transferOwnership(minter);
+        GuruPassToken(token).transferOwnership(_msgSender());
 
         emit Deployed(
             token,
