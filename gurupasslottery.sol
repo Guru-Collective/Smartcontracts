@@ -73,7 +73,7 @@ contract GuruPassLottery is Ownable, IERC721Receiver
             }
 
             address winner = token.ownerOf(initialTokenId + value);
-            token.safeTransferFrom(address(this), winner, prizes[i]);
+            prizeContract.safeTransferFrom(address(this), winner, prizes[i]);
             emit Win(winner, prizes[i]);
             totalSize = totalSize - 1;
         }
