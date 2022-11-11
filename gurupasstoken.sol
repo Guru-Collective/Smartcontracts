@@ -39,7 +39,7 @@ contract GuruPassToken is ERC721, Ownable
     {
         setMetaLoader(_msgSender());
         setBaseURI("https://ipfs.io/ipfs/");
-        setDefaultMeta("bafkreiccsnyjhpjnhz33sl4rd3gqxjjp3nuq2fuslxbglyuccznagj2iee");
+        setDefaultMeta("bafkreihy4y6htatdukz2i5ujdnl5nb55ezjwgocuiauvii4bvzn24xkfka");
         emit Deployed();
     }
 
